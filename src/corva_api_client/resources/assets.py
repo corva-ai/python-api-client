@@ -19,6 +19,14 @@ class AssetStatus(StrEnum):
     ARCHIVED = "archived"
 
 
+def _serialize_asset_types(types: str | Sequence[str] | None) -> list[str]:
+    if types is None:
+        return []
+
+    raw_types = types.split(",") if isinstance(types, str) else types
+    return [value for raw_type in raw_types if (value := str(raw_type).strip())]
+
+
 def _serialize_asset_status(
     status: AssetStatus | Sequence[AssetStatus] | None,
 ) -> list[str]:
@@ -64,7 +72,7 @@ class AssetsClient:
     def search(
         self,
         query: str | None = None,
-        types: str | None = None,
+        types: str | Sequence[str] | None = None,
         status: AssetStatus | Sequence[AssetStatus] | None = None,
         company_id: int | None = None,
         fields: str | None = "*",
@@ -80,8 +88,9 @@ class AssetsClient:
 
         if query:
             params["search"] = query
-        if types:
-            params["types"] = types
+        serialized_types = _serialize_asset_types(types)
+        if serialized_types:
+            params["types[]"] = serialized_types
         serialized_status = _serialize_asset_status(status)
         if serialized_status:
             params["status[]"] = serialized_status

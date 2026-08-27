@@ -28,6 +28,48 @@ def test_search_includes_visibility() -> None:
 
 
 @pytest.mark.parametrize(
+    ("types", "expected"),
+    [
+        ("well", ["well"]),
+        (["well", "rig"], ["well", "rig"]),
+        ("well, rig", ["well", "rig"]),
+    ],
+)
+def test_search_serializes_types(types, expected: list[str]) -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(types=types)
+
+    params = client.get.call_args.kwargs["params"]
+    assert params["types[]"] == expected
+
+
+def test_search_encodes_multiple_types_as_repeated_array_parameters() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(types=["well", "rig"])
+
+    params = httpx.QueryParams(client.get.call_args.kwargs["params"])
+    assert params.multi_items() == [
+        ("types[]", "well"),
+        ("types[]", "rig"),
+        ("fields", "*"),
+        ("sort", "-last_active_at"),
+    ]
+
+
+def test_search_omits_empty_types_collection() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(types=[])
+
+    assert "types[]" not in client.get.call_args.kwargs["params"]
+
+
+@pytest.mark.parametrize(
     ("status", "expected"),
     [
         (AssetStatus.ACTIVE, ["active"]),
