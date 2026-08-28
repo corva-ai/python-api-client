@@ -22,8 +22,8 @@ classifiers = [
 dependencies = ["httpx>=0.28.1", "jsonschema>=4.25.1", "pymongo>=4.16.0"]
 
 [project.urls]
-Repository = "https://github.com/bryansray/corva-api-client"
-Issues = "https://github.com/bryansray/corva-api-client/issues"
+Repository = "https://github.com/corva-ai/python-api-client"
+Issues = "https://github.com/corva-ai/python-api-client/issues"
 
 [dependency-groups]
 dev = [
