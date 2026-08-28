@@ -151,10 +151,11 @@ DEFAULT_ASSET_FIELDS: tuple[AssetField, ...] = (
 def _serialize_asset_fields(
     fields: str | Sequence[AssetFieldValue] | None,
 ) -> str | None:
-    if fields is None or isinstance(fields, str):
-        return fields
+    if fields is None:
+        return None
 
-    return ",".join(value for field in fields if (value := str(field).strip())) or None
+    raw_fields = fields.split(",") if isinstance(fields, str) else fields
+    return ",".join(value for field in raw_fields if (value := str(field).strip())) or None
 
 
 def _serialize_asset_types(types: str | Sequence[str] | None) -> list[str]:

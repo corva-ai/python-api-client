@@ -15,7 +15,7 @@ from corva_api_client.resources import (
 
 
 def _serializer_attributes(path: Path) -> set[str]:
-    lines = path.read_text().splitlines()
+    lines = path.read_text(encoding="utf-8").splitlines()
     attributes: set[str] = set()
     index = 0
 
@@ -39,8 +39,18 @@ def _serializer_attributes(path: Path) -> set[str]:
 
 
 def _asset_relationships(path: Path) -> set[str]:
-    source = path.read_text()
-    index_action = source.split("def index", maxsplit=1)[1].split("def show", maxsplit=1)[0]
+    source = path.read_text(encoding="utf-8")
+    if "def index" not in source:
+        raise ValueError(f"Could not find the index action in {path}")
+
+    index_action = source.split("def index", maxsplit=1)[1]
+    if "def show" not in index_action:
+        raise ValueError(f"Could not find the end of the index action in {path}")
+
+    index_action = index_action.split("def show", maxsplit=1)[0]
+    if "serializer_options" not in index_action:
+        raise ValueError(f"Could not find serializer_options in the index action in {path}")
+
     serializer_call = index_action.split("serializer_options", maxsplit=1)[1]
     match = re.search(r"%i\[([^]]+)]", serializer_call, flags=re.DOTALL)
     if not match:

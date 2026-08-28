@@ -154,6 +154,17 @@ def test_search_accepts_custom_fields_for_forward_compatibility() -> None:
     assert client.get.call_args.kwargs["params"]["fields"] == ("asset.name,asset.future_field")
 
 
+def test_search_normalizes_comma_separated_field_string() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(fields=" asset.name, asset.status, ,asset.last_active_at ")
+
+    assert client.get.call_args.kwargs["params"]["fields"] == (
+        "asset.name,asset.status,asset.last_active_at"
+    )
+
+
 @pytest.mark.parametrize("fields", ["*", "all"])
 def test_search_supports_explicit_full_fieldsets(fields: str) -> None:
     client = Mock()
