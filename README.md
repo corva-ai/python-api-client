@@ -105,6 +105,13 @@ compatibility. Pass `fields="*"` or `fields="all"` only when every supported att
 and relationship is required, because those options can produce substantially larger
 responses. Pass `fields=None` to omit the parameter and use the API's default fieldset.
 
+When the Rails asset serializers or relationship whitelist change, compare this SDK's
+field enums with a local `corva-api` checkout:
+
+```bash
+just check-asset-fields /path/to/corva-api
+```
+
 ## Configuration
 
 `CorvaConfig.from_env()` reads these environment variables:
