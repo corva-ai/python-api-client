@@ -12,7 +12,17 @@ from .app_settings_templates import AppSettingsTemplatesClient
 from .app_store_articles import AppStoreArticlesClient
 from .app_stream import AppStreamClient
 from .apps import AppsClient
-from .assets import AssetsClient, AssetStatus
+from .assets import (
+    DEFAULT_ASSET_FIELDS,
+    AssetField,
+    AssetFieldValue,
+    AssetRelationship,
+    AssetsClient,
+    AssetStatus,
+    CompanyField,
+    ViewerLineField,
+    ViewerPadField,
+)
 from .audits import AuditsClient
 from .column_mapper_templates import ColumnMapperTemplatesClient
 from .companies import CompaniesClient
@@ -55,11 +65,16 @@ __all__ = [
     "AppStoreArticlesClient",
     "AppStreamClient",
     "AppsClient",
+    "AssetField",
+    "AssetFieldValue",
+    "AssetRelationship",
     "AssetStatus",
     "AssetsClient",
     "AuditsClient",
     "ColumnMapperTemplatesClient",
     "CompaniesClient",
+    "CompanyField",
+    "DEFAULT_ASSET_FIELDS",
     "DashboardAppAnnotationsClient",
     "DashboardsClient",
     "DataClient",
@@ -80,6 +95,8 @@ __all__ = [
     "SecurityClient",
     "TasksClient",
     "UsersClient",
+    "ViewerLineField",
+    "ViewerPadField",
     "WellViewClient",
     "WellsClient",
     "WorkflowsClient",

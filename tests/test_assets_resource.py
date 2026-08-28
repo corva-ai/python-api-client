@@ -6,7 +6,13 @@ from unittest.mock import Mock
 import httpx
 import pytest
 
-from corva_api_client.resources import AssetsClient, AssetStatus
+from corva_api_client.resources import (
+    AssetField,
+    AssetRelationship,
+    AssetsClient,
+    AssetStatus,
+    CompanyField,
+)
 
 
 def test_search_includes_visibility() -> None:
@@ -20,7 +26,7 @@ def test_search_includes_visibility() -> None:
     client.get.assert_called_once_with(
         "/v2/assets",
         params={
-            "fields": "*",
+            "fields": "asset.name,asset.asset_type,asset.status",
             "sort": "-last_active_at",
             "visibility": "company",
         },
@@ -55,7 +61,7 @@ def test_search_encodes_multiple_types_as_repeated_array_parameters() -> None:
     assert params.multi_items() == [
         ("types[]", "well"),
         ("types[]", "rig"),
-        ("fields", "*"),
+        ("fields", "asset.name,asset.asset_type,asset.status"),
         ("sort", "-last_active_at"),
     ]
 
@@ -97,7 +103,7 @@ def test_search_encodes_multiple_statuses_as_repeated_array_parameters() -> None
     assert params.multi_items() == [
         ("status[]", "active"),
         ("status[]", "paused"),
-        ("fields", "*"),
+        ("fields", "asset.name,asset.asset_type,asset.status"),
         ("sort", "-last_active_at"),
     ]
 
@@ -119,3 +125,50 @@ def test_search_omits_empty_status_collection() -> None:
     assets.search(status=[])
 
     assert "status[]" not in client.get.call_args.kwargs["params"]
+
+
+def test_search_serializes_discoverable_fields() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(
+        fields=[
+            AssetField.NAME,
+            AssetField.ASSET_TYPE,
+            AssetRelationship.COMPANY,
+            CompanyField.NAME,
+        ]
+    )
+
+    assert client.get.call_args.kwargs["params"]["fields"] == (
+        "asset.name,asset.asset_type,asset.company,company.name"
+    )
+
+
+def test_search_accepts_custom_fields_for_forward_compatibility() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(fields=[AssetField.NAME, "asset.future_field"])
+
+    assert client.get.call_args.kwargs["params"]["fields"] == ("asset.name,asset.future_field")
+
+
+@pytest.mark.parametrize("fields", ["*", "all"])
+def test_search_supports_explicit_full_fieldsets(fields: str) -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(fields=fields)
+
+    assert client.get.call_args.kwargs["params"]["fields"] == fields
+
+
+@pytest.mark.parametrize("fields", [None, []])
+def test_search_omits_empty_fields(fields) -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(fields=fields)
+
+    assert "fields" not in client.get.call_args.kwargs["params"]

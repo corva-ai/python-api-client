@@ -74,6 +74,37 @@ apps = client.apps.search(type="drilling")
 client.close()
 ```
 
+### Asset field selection
+
+Asset searches use a compact fieldset by default to avoid returning every asset
+attribute and relationship:
+
+```python
+assets = client.assets.search()
+# fields=asset.name,asset.asset_type,asset.status
+```
+
+Use the exported field enums to discover and select additional data. A relationship
+must be selected along with any fields needed from its related record:
+
+```python
+from corva_api_client.resources import AssetField, AssetRelationship, CompanyField
+
+assets = client.assets.search(
+    fields=[
+        AssetField.NAME,
+        AssetField.COUNTRY,
+        AssetRelationship.COMPANY,
+        CompanyField.NAME,
+    ]
+)
+```
+
+The client also accepts comma-separated strings and arbitrary field names for forward
+compatibility. Pass `fields="*"` or `fields="all"` only when every supported attribute
+and relationship is required, because those options can produce substantially larger
+responses. Pass `fields=None` to omit the parameter and use the API's default fieldset.
+
 ## Configuration
 
 `CorvaConfig.from_env()` reads these environment variables:
