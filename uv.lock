@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = ">=3.11"
 
+[manifest]
+constraints = [{ name = "anyio", specifier = ">=4.14.2" }]
+
 [[package]]
 name = "anyio"
 version = "4.14.2"

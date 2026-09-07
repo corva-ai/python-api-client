@@ -42,6 +42,7 @@ where = ["src"]
 
 [tool.uv]
 default-groups = ["dev"]
+constraint-dependencies = ["anyio>=4.14.2"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
