@@ -47,7 +47,7 @@ from .security import SecurityClient
 from .tasks import TasksClient
 from .users import UsersClient
 from .well_view import WellViewClient
-from .wells import WellsClient
+from .wells import DEFAULT_WELL_FIELDS, WellField, WellsClient
 from .workflows import WorkflowsClient
 
 __all__ = [
@@ -75,6 +75,7 @@ __all__ = [
     "CompaniesClient",
     "CompanyField",
     "DEFAULT_ASSET_FIELDS",
+    "DEFAULT_WELL_FIELDS",
     "DashboardAppAnnotationsClient",
     "DashboardsClient",
     "DataClient",
@@ -97,6 +98,7 @@ __all__ = [
     "UsersClient",
     "ViewerLineField",
     "ViewerPadField",
+    "WellField",
     "WellViewClient",
     "WellsClient",
     "WorkflowsClient",

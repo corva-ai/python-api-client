@@ -105,6 +105,23 @@ compatibility. Pass `fields="*"` or `fields="all"` only when every supported att
 and relationship is required, because those options can produce substantially larger
 responses. Pass `fields=None` to omit the parameter and use the API's default fieldset.
 
+Well searches also accept typed sparse fields. The SDK retains its existing
+`fields="*"` well-search default for compatibility; select the compact fieldset
+explicitly for discovery workflows:
+
+```python
+from corva_api_client.resources import DEFAULT_WELL_FIELDS, WellField
+
+wells = client.wells.search(fields=DEFAULT_WELL_FIELDS)
+# fields=well.asset_id,well.name,well.status,well.state
+wells = client.wells.search(fields=[WellField.NAME, WellField.IDENTIFIER])
+```
+
+`WellField` exposes unconditional well attributes. Relationship and conditional
+fields are not advertised by this enum. Raw field strings remain supported.
+Empty field sequences raise `ValueError` to avoid accidentally requesting the
+server's broader defaults; `None` explicitly selects the server default.
+
 When the Rails asset serializers or relationship whitelist change, compare this SDK's
 field enums with a local `corva-api` checkout:
 
