@@ -222,8 +222,15 @@ class AssetsClient:
         per_page: int | None = None,
         order: str | None = None,
         visibility: str | None = None,
+        *,
+        ids: Sequence[int] | None = None,
     ):
         """Search assets using a discoverable JSON:API sparse fieldset.
+
+        ``ids`` restricts results to a nonempty sequence of positive integer asset
+        IDs, intersected with the other filters and caller permissions. IDs are
+        sent as repeated ``ids[]`` parameters. Pass ``None`` to omit the filter.
+        Empty sequences and invalid IDs raise ``ValueError`` before any request.
 
         ``fields`` accepts enum members, arbitrary ``<record_type>.<field>``
         strings, comma-separated strings, or the explicit full-payload values
@@ -238,6 +245,14 @@ class AssetsClient:
         ``"*"`` or ``"all"`` can produce a substantially larger payload.
         """
         params: dict[str, Any] = {}
+
+        if ids is not None:
+            if isinstance(ids, (str, bytes)) or not isinstance(ids, Sequence):
+                raise ValueError("Asset IDs must be a nonempty sequence of positive integers.")
+            asset_ids = list(ids)
+            if not asset_ids or any(type(id) is not int or id <= 0 for id in asset_ids):
+                raise ValueError("Asset IDs must be a nonempty sequence of positive integers.")
+            params["ids[]"] = asset_ids
 
         if query:
             params["search"] = query
