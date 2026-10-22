@@ -74,6 +74,23 @@ apps = client.apps.search(type="drilling")
 client.close()
 ```
 
+### Asset ID filtering
+
+Fetch selected fields for known assets in one request:
+
+```python
+from corva_api_client.resources import AssetField
+
+assets = client.assets.search(ids=[123, 456], fields=[AssetField.NAME])
+```
+
+`ids` accepts a nonempty sequence of positive integers and is sent to the API as
+repeated `ids[]` parameters. It combines with the other search filters and caller
+permissions; results need not include every requested ID or follow input order.
+Pass `ids=None` (the default) to omit the filter. Empty sequences, booleans,
+strings, and other invalid IDs raise `ValueError` before sending a request.
+Normal field defaults and pagination still apply.
+
 ### Asset field selection
 
 Asset searches use a compact fieldset by default to avoid returning every asset

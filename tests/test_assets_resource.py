@@ -183,3 +183,73 @@ def test_search_omits_empty_fields(fields) -> None:
     assets.search(fields=fields)
 
     assert "fields" not in client.get.call_args.kwargs["params"]
+
+
+@pytest.mark.parametrize("ids", [[123, 456], (123, 456)])
+def test_search_filters_ids_with_existing_options(ids) -> None:
+    client = Mock()
+    client.get.return_value = {"data": [{"id": "123"}]}
+    assets = AssetsClient(client)
+
+    result = assets.search(
+        ids=ids,
+        query="well",
+        company_id=80,
+        visibility="visible",
+        types="well",
+        status=AssetStatus.ACTIVE,
+        fields=[AssetField.NAME],
+        start=1000,
+        end=2000,
+        sort="name",
+        order="asc",
+        page=2,
+        per_page=10,
+    )
+
+    assert result == {"data": [{"id": "123"}]}
+    client.get.assert_called_once_with(
+        "/v2/assets",
+        params={
+            "ids[]": [123, 456],
+            "search": "well",
+            "company_id": 80,
+            "visibility": "visible",
+            "types[]": ["well"],
+            "status[]": ["active"],
+            "fields": "asset.name",
+            "start": 1000,
+            "end": 2000,
+            "sort": "name",
+            "order": "asc",
+            "page": 2,
+            "per_page": 10,
+        },
+    )
+    params = httpx.QueryParams(client.get.call_args.kwargs["params"])
+    assert params.get_list("ids[]") == ["123", "456"]
+
+
+@pytest.mark.parametrize(
+    "ids", [[], (), [0], [-1], [True], [1.0], ["123"], [123, None], "123,456", 123]
+)
+def test_search_rejects_invalid_ids_before_request(ids) -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    with pytest.raises(ValueError, match="nonempty sequence of positive integers"):
+        assets.search(ids=ids)
+
+    client.get.assert_not_called()
+
+
+def test_search_none_ids_preserves_default_request() -> None:
+    client = Mock()
+    assets = AssetsClient(client)
+
+    assets.search(ids=None)
+
+    assert client.get.call_args.kwargs["params"] == {
+        "fields": "asset.name,asset.asset_type,asset.status",
+        "sort": "-last_active_at",
+    }
